@@ -1,42 +1,72 @@
 import PropTypes from 'prop-types';
-import { Component } from 'react';
+import {  useEffect} from 'react';
 import { createPortal } from 'react-dom';
 import { Overlay, ModalWindow } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handlekeyDown);
-  }
+export function Modal({ picture, onClose }) {  
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handlekeyDown);
-  }
+  useEffect(() => {
+    console.log("Mount");
+    const handlekeyDown = e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    };
 
-  handlekeyDown = e => {
-    if (e.code === 'Escape') {
-      this.props.onClose();
-    }
-  };
+    window.addEventListener('keydown', handlekeyDown);
+    return ()=> {window.removeEventListener('keydown', handlekeyDown);}
+  }, [onClose]);
 
-  handleBackDropClick = event => {
+  const handleBackDropClick = event => {
     if (event.target === event.currentTarget) {
-      this.props.onClose();
+      onClose();
     }
   };
 
-  render() {
-    return createPortal(
-      <Overlay onClick={this.handleBackDropClick}>
-        <ModalWindow>
-          <img src={this.props.picture} alt="" />
-        </ModalWindow>
-      </Overlay>,
-      modalRoot
-    );
-  }
+  return createPortal(
+    <Overlay onClick={handleBackDropClick}>
+      <ModalWindow>
+        <img src={picture} alt="" />
+      </ModalWindow>
+    </Overlay>,
+    modalRoot
+  );
 }
+
+// class OldModal extends Component {
+//   componentDidMount() {
+//     window.addEventListener('keydown', this.handlekeyDown);
+//   }
+
+//   componentWillUnmount() {
+//     window.removeEventListener('keydown', this.handlekeyDown);
+//   }
+
+//   handlekeyDown = e => {
+//     if (e.code === 'Escape') {
+//       this.props.onClose();
+//     }
+//   };
+
+//   handleBackDropClick = event => {
+//     if (event.target === event.currentTarget) {
+//       this.props.onClose();
+//     }
+//   };
+
+//   render() {
+//     return createPortal(
+//       <Overlay onClick={this.handleBackDropClick}>
+//         <ModalWindow>
+//           <img src={this.props.picture} alt="" />
+//         </ModalWindow>
+//       </Overlay>,
+//       modalRoot
+//     );
+//   }
+// }
 
 Modal.propTypes = {
   picture: PropTypes.string.isRequired,
