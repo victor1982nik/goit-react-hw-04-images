@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchData } from './Api/fetchData';
 import { Box } from './App.styled';
 import { BtnLoadMore } from './Button/BtnLoadMore';
@@ -7,74 +7,50 @@ import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
 import { SearchBar } from './SearchBar/SearchBar';
 
-export class App extends Component {
-  state = {
-    pictures: [],
-    picture: null,
-    error: null,
-    filter: '',
-    isLoading: false,
-    total: null,
-    page: 1,
-  };
+export function App() {
+  const [pictures, setPictures] = useState([]);
+  const [picture, setPicture] = useState(null);
+  const [input, setInput] = useState('');
+  const [filter, setFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [total, setTotal] = useState(null);
 
-  handleFilter = e => {
-    this.setState({ filter: e.target.value });
-  };
+  useEffect(() => {
+    if (filter === '') return;
 
-  handlerFormSubmit = async e => {
+    setIsLoading(true);
+    const getData = async () => {
+      const resp = await fetchData(filter, page);
+      if (!resp.data.hits.length) {
+        return;
+      }
+      setPictures(state => [...state, ...resp.data.hits]);
+      setTotal(resp.data.total);
+    };
+
+    getData()
+      .catch(error => setError(error))
+      .finally(setIsLoading(false));
+  }, [page, filter]);
+
+  const handlerFormSubmit = e => {
     e.preventDefault();
-    const { filter, page } = this.state;
-    if (this.state.filter === '') {
-      this.setState({ error: 'По вашему запросу ничего не найдено' });
+
+    if (input === filter) {
       return;
     }
-    this.setState({ isLoading: true });
-    try {
-      const response = await fetchData(filter, page);
-
-      this.setState({
-        pictures: response.data.hits,
-        total: response.data.total,
-        page: 1,
-        error: null,
-      });
-    } catch (error) {
-      this.setState({ error: 'Что-то пошло не так, перезагрузите страницу' });
-    } finally {
-      this.setState({ isLoading: false });
-    }
+    setFilter(input);
+    setPictures([]);
+    setPage(1);
   };
 
-  handleModal = bigPicture => {
-    this.setState({ picture: bigPicture });
+  const handleModal = bigPicture => {
+    setPicture(bigPicture);
   };
 
-  closeModal = () => {
-    this.setState({ picture: null });
-  };
-
-  onClickLoadMore = async e => {
-    const { filter, page } = this.state;
-    this.setState({ isLoading: true });
-    try {
-      const response = await fetchData(filter, page + 1);
-
-      this.setState(prevState => {
-        return {
-          pictures: [...prevState.pictures, ...response.data.hits],
-          page: page + 1,
-        };
-      });
-    } catch (error) {
-      this.setState({ error: 'Что-то пошло не так, перезагрузите страницу' });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
-
-  createRenderList() {
-    const { pictures } = this.state;
+  const createRenderList = () => {
     if (pictures) {
       return pictures.map(item => ({
         id: item.id,
@@ -82,27 +58,136 @@ export class App extends Component {
         big: item.largeImageURL,
       }));
     }
-  }
+  };
 
-  render() {
-    const { pictures, isLoading, filter, picture, error, total } = this.state;
-    let options = this.createRenderList();
+  let options = createRenderList();
 
-    return (
-      <Box>
-        <SearchBar
-          filter={filter}
-          onSubmit={this.handlerFormSubmit}
-          onChange={this.handleFilter}
-        ></SearchBar>
-        {error && <div>{error}</div>}
-        {options && <ImageGallery data={options} onClick={this.handleModal} />}
-        {isLoading && <Loader />}
-        {pictures.length > 0 && pictures.length < total && (
-          <BtnLoadMore text="Load More" onClick={this.onClickLoadMore} />
-        )}
-        {picture && <Modal picture={picture} onClose={this.closeModal}></Modal>}
-      </Box>
-    );
-  }
+  return (
+    <Box>
+      <SearchBar
+        inputValue={input}
+        onSubmit={handlerFormSubmit}
+        onChange={e => setInput(e.target.value)}
+      ></SearchBar>
+      {error && <div>{error}</div>}
+      {options && <ImageGallery data={options} onClick={handleModal} />}
+      {isLoading && <Loader />}
+      {pictures.length > 0 && pictures.length < total && (
+        <BtnLoadMore
+          text="Load More"
+          onClick={() => setPage(state => state + 1)}
+        />
+      )}
+      {picture && (
+        <Modal picture={picture} onClose={() => setPicture(null)}></Modal>
+      )}
+    </Box>
+  );
 }
+
+// class oldApp extends Component {
+//   state = {
+//     pictures: [],
+//     picture: null,
+//     error: null,
+//     filter: '',
+//     isLoading: false,
+//     total: null,
+//     page: 1,
+//     input: '',
+//   };
+
+//   async componentDidUpdate(_, prevState) {
+//     const { filter, page } = this.state;
+//     if (prevState.page !== page || prevState.filter !== filter) {
+//       try {
+//         this.setState({ isLoading: true });
+//         const response = await fetchData(filter, page);
+//         if (!response.data.hits.length) {
+//           return;
+//         }
+//         //console.log(page, prevState.pictures, response.data.hits);
+//         //debugger;
+//         //     if(!response) {return}
+//         this.setState(prevState => {
+//           return {
+//             pictures: [...prevState.pictures, ...response.data.hits],
+//             total: response.data.total,
+//           };
+//         });
+//       } catch (error) {
+//         this.setState({ error: 'Что-то пошло не так, перезагрузите страницу' });
+//       } finally {
+//         this.setState({ isLoading: false });
+//       }
+//     }
+//   }
+
+//   handleInput = e => {
+//     this.setState({ input: e.target.value });
+//   };
+
+//   handlerFormSubmit = e => {
+//     e.preventDefault();
+
+//     const { input, filter } = this.state;
+//     if (input === filter) {
+//       return;
+//     }
+
+//     this.setState({
+//       filter: input,
+//       pictures: [],
+//       page: 1,
+//     });
+//   };
+
+//   handleModal = bigPicture => {
+//     this.setState({ picture: bigPicture });
+//   };
+
+//   closeModal = () => {
+//     this.setState({ picture: null });
+//   };
+
+//   onClickLoadMore = async e => {
+//     this.setState(prevState => {
+//       return {
+//         page: prevState.page + 1,
+//       };
+//     });
+//   };
+
+//   createRenderList() {
+//     const { pictures } = this.state;
+//     if (pictures) {
+//       return pictures.map(item => ({
+//         id: item.id,
+//         small: item.webformatURL,
+//         big: item.largeImageURL,
+//       }));
+//     }
+//   }
+
+//   render() {
+//     const { pictures, isLoading, input, picture, error, total } = this.state;
+//     let options = this.createRenderList();
+
+//     return (
+//       <Box>
+//         <SearchBar
+//           inputValue={input}
+//           onSubmit={this.handlerFormSubmit}
+//           onChange={this.handleInput}
+//         ></SearchBar>
+//         {error && <div>{error}</div>}
+//         {options && <ImageGallery data={options} onClick={this.handleModal} />}
+//         {isLoading && <Loader />}
+//         {pictures.length > 0 && pictures.length < total && (
+//           <BtnLoadMore text="Load More" onClick={this.onClickLoadMore} />
+//         )}
+//         {picture && <Modal picture={picture} onClose={this.closeModal}></Modal>}
+//       </Box>
+//     );
+//   }
+// }

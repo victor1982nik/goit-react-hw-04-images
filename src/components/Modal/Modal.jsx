@@ -1,14 +1,13 @@
 import PropTypes from 'prop-types';
-import {  useEffect} from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Overlay, ModalWindow } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export function Modal({ picture, onClose }) {  
-
+export function Modal({ picture, onClose }) {
   useEffect(() => {
-    console.log("Mount");
+    //console.log('Mount');
     const handlekeyDown = e => {
       if (e.code === 'Escape') {
         onClose();
@@ -16,7 +15,9 @@ export function Modal({ picture, onClose }) {
     };
 
     window.addEventListener('keydown', handlekeyDown);
-    return ()=> {window.removeEventListener('keydown', handlekeyDown);}
+    return () => {
+      window.removeEventListener('keydown', handlekeyDown);
+    };
   }, [onClose]);
 
   const handleBackDropClick = event => {
@@ -34,6 +35,11 @@ export function Modal({ picture, onClose }) {
     modalRoot
   );
 }
+
+Modal.propTypes = {
+  picture: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
 
 // class OldModal extends Component {
 //   componentDidMount() {
@@ -67,8 +73,3 @@ export function Modal({ picture, onClose }) {
 //     );
 //   }
 // }
-
-Modal.propTypes = {
-  picture: PropTypes.string.isRequired,
-  onClose: PropTypes.func.isRequired,
-};

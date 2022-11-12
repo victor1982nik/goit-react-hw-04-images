@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { FaSearch } from 'react-icons/fa';
 import { Button, Form, Input, Searchbar } from './SearchBar.styled';
 
-export const SearchBar = ({ filter, onSubmit, onChange }) => {
+export const SearchBar = ({ inputValue, onSubmit, onChange }) => {
   //console.log("filter", filter,"OnSubmit", onSubmit, "onChange", onChange);
   return (
     <Searchbar>
@@ -21,6 +21,7 @@ export const SearchBar = ({ filter, onSubmit, onChange }) => {
           autoFocus
           placeholder="Search images and photos"
           onChange={onChange}
+          value={inputValue}
         />
       </Form>
     </Searchbar>
@@ -32,28 +33,3 @@ SearchBar.propTypes = {
   onSubmit: PropTypes.func,
   onChange: PropTypes.func,
 };
-
-/*<button type="button" >
-        <FaSearch />
-      </button>
-      <input
-        type="filter"
-        name="filter"
-        value={filter}
-        
-      ></input>
-<header class="searchbar">
-  <form class="form">
-    <button type="submit" class="button">
-      <span class="button-label">Search</span>
-    </button>
-
-    <input
-      class="input"
-      type="text"
-      autocomplete="off"
-      autofocus
-      placeholder="Search images and photos"
-    />
-  </form>
-</header>*/
