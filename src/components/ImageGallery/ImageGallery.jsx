@@ -6,7 +6,14 @@ export const ImageGallery = ({ data, onClick }) => {
   return (
     <List>
       {data.map(item => {
-        return <ImageGalleryItem key={item.id} item={item} onClick={onClick} />;
+        return (
+          <ImageGalleryItem
+            key={item.id}
+            smallPict={item.webformatURL}
+            bigPict={item.largeImageURL}
+            onClick={onClick}
+          />
+        );
       })}
     </List>
   );
@@ -15,14 +22,10 @@ export const ImageGallery = ({ data, onClick }) => {
 ImageGallery.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      small: PropTypes.string,
-      big: PropTypes.string,
-      key: PropTypes.string,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
     })
   ),
-  onClick: PropTypes.func,
+  onClick: PropTypes.func.isRequired,
 };
-
-// <ListItem key={item.id}>
-//   <Image src={item.small} alt="" onClick={() => onClick(item.big)} />
-// </ListItem>

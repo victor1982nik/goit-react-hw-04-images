@@ -29,7 +29,7 @@ export const SearchBar = ({ inputValue, onSubmit, onChange }) => {
 };
 
 SearchBar.propTypes = {
-  filter: PropTypes.string,
-  onSubmit: PropTypes.func,
-  onChange: PropTypes.func,
+  inputValue: PropTypes.string.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
 };

@@ -19,20 +19,22 @@ export function App() {
 
   useEffect(() => {
     if (filter === '') return;
-
-    setIsLoading(true);
-    const getData = async () => {
-      const resp = await fetchData(filter, page);
-      if (!resp.data.hits.length) {
-        return;
-      }
-      setPictures(state => [...state, ...resp.data.hits]);
-      setTotal(resp.data.total);
-    };
-
-    getData()
-      .catch(error => setError(error))
-      .finally(setIsLoading(false));
+    try {
+      setIsLoading(true);
+      const getData = async () => {
+        const resp = await fetchData(filter, page);
+        if (!resp.data.hits.length) {
+          return;
+        }
+        setPictures(state => [...state, ...resp.data.hits]);
+        setTotal(resp.data.total);
+      };
+      getData();
+    } catch (error) {
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [page, filter]);
 
   const handlerFormSubmit = e => {
@@ -50,18 +52,6 @@ export function App() {
     setPicture(bigPicture);
   };
 
-  const createRenderList = () => {
-    if (pictures) {
-      return pictures.map(item => ({
-        id: item.id,
-        small: item.webformatURL,
-        big: item.largeImageURL,
-      }));
-    }
-  };
-
-  let options = createRenderList();
-
   return (
     <Box>
       <SearchBar
@@ -70,7 +60,9 @@ export function App() {
         onChange={e => setInput(e.target.value)}
       ></SearchBar>
       {error && <div>{error}</div>}
-      {options && <ImageGallery data={options} onClick={handleModal} />}
+      {pictures.length > 0 && (
+        <ImageGallery data={pictures} onClick={handleModal} />
+      )}
       {isLoading && <Loader />}
       {pictures.length > 0 && pictures.length < total && (
         <BtnLoadMore
@@ -84,6 +76,18 @@ export function App() {
     </Box>
   );
 }
+
+// const createRenderList = () => {
+//   if (pictures) {
+//     return pictures.map(item => ({
+//       id: item.id,
+//       small: item.webformatURL,
+//       big: item.largeImageURL,
+//     }));
+//   }
+// };
+
+// let options = createRenderList();
 
 // class oldApp extends Component {
 //   state = {
